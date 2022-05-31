@@ -1,34 +1,41 @@
 const { Schema, model } = require('mongoose');
-const dateFormat = require('../utils/dateFormat');
+const Thought = require("./Thought");
 
 const UserSchema = new Schema(
     {
-        // set custom id to avoid confusion with parent comment _id
-        replyId: {
-            type: Schema.Types.ObjectId,
-            default: () => new Types.ObjectId()
+        username: {
+            type: String,
+            unique: true,
+            required: "You need to provide a username!",
+            trim: true,
         },
-        replyBody: {
+        email: {
             type: String,
             required: true,
-            trim: true
+            unique: true,
+            match: /^[a-z0-9]+@[a-z]+\.[a-z]{2,3}$/,
         },
-        writtenBy: {
-            type: String,
-            required: true
+        thoughts: [
+            {
+              type: Schema.Types.ObjectId,
+              ref: "Thought",
+            },
+        ],
+        friends: [
+            {
+              type: Schema.Types.ObjectId,
+              ref: "User",
+            },
+          ],
         },
-        createdAt: {
-            type: Date,
-            default: Date.now,
-            get: createdAtVal => dateFormat(createdAtVal)
+        {
+          toJSON: {
+            virtuals: true,
+          },
+          id: false,
         }
-    },
-    {
-        toJSON: {
-            getter: true
-        }
-    }
 );
+      
 
 UserSchema.virtual('friendCount').get(function() {
     return this.friends.length;
